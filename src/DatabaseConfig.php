@@ -6,9 +6,9 @@
 namespace VgaDatabase;
 
 use \PDO;
-use VgaDatabase\Exceptions\VgaDatabaseConfigurationException;
+use \VgaDatabase\Exceptions\VgaDatabaseConfigurationException;
 
-class VgaDatabaseConfig
+class DatabaseConfig
 {
     private $settings = [];
 
@@ -19,7 +19,7 @@ class VgaDatabaseConfig
 
     public function getDsn(): string
     {
-        $driver = "driver={$this->settings['driver']}";
+        $driver = "{$this->settings['driver']}";
         $host = "host={$this->settings['host']}";
         if (!empty($this->settings['port'])) {
             $host .= ";port={$this->settings['port']}";
