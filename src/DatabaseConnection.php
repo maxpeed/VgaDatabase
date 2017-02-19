@@ -62,6 +62,10 @@ class DatabaseConnection
         return $result;
     }
 
+    public function close() {
+        $this->connection = null;
+    }
+
     private function connect(): bool
     {
         if (!$this->isConnected()) {
