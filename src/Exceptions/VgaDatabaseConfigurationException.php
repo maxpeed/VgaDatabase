@@ -5,11 +5,9 @@
 
 namespace VgaDatabase\Exceptions;
 
-use \Exception;
-
-class VgaDatabaseConfigurationException  extends Exception implements VgaException
+class VgaDatabaseConfigurationException extends VgaException
 {
-    private $faultySettings;
+    protected  $faultySettings;
 
     /**
      * VgaDatabaseConfigurationException constructor.
@@ -18,19 +16,24 @@ class VgaDatabaseConfigurationException  extends Exception implements VgaExcepti
     public function __construct(array $settings)
     {
         $this->faultySettings = $settings;
-        parent::__construct("Error in configuration");
+        parent::__construct();
     }
 
+    /**
+     * @return string
+     */
     public function toPrintableString(): string
     {
-        $string = "<pre>VgaDatabase Configuration error:<br>";
+        $string = "<p>VgaDatabase Configuration error: {$this->getMessage()}</p>
+                    <pre>";
+
         foreach ($this->faultySettings as $setting => $value) {
             $string .= "[ $setting => $value ]<br>";
         }
+
         $string .= "</pre>";
 
         return $string;
     }
-
 
 }

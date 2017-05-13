@@ -6,7 +6,6 @@
 
 use VgaDatabase\DatabaseConnection;
 
-
 class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
 {
     protected $pathToIniFile = __DIR__ . '/database_test.ini';
@@ -48,9 +47,11 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
               (:int, :char, :text)";
 
         $values = [
-            'int' => 1234,
-            'char' => 'A String',
-            'text' => 'Some Text for this field'
+            0 => [
+                'int' => 1234,
+                'char' => 'A String',
+                'text' => 'Some Text for this field'
+            ]
         ];
 
         $result = $this->databaseConnection->write($sql, $values);
@@ -97,9 +98,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
                 'text' => 'dihghdlfghadfihgdaifhgdfihghdfligh']
         ];
 
-        $multi = true;
-
-        $result = $this->databaseConnection->write($sql, $values, $multi);
+        $result = $this->databaseConnection->write($sql, $values);
 
         $this->assertTrue($result);
     }
