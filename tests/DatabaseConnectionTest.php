@@ -30,7 +30,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
                 field_text TEXT
             )";
 
-        $result = $this->databaseConnection->write($sql);
+        $result = $this->databaseConnection->exe($sql);
 
         $this->assertTrue($result);
     }
@@ -47,16 +47,18 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
               (:int, :char, :text)";
 
         $values = [
-            0 => [
+            [
                 'int' => 1234,
                 'char' => 'A String',
                 'text' => 'Some Text for this field'
             ]
         ];
 
-        $result = $this->databaseConnection->write($sql, $values);
+        $result = $this->databaseConnection->exe($sql, $values);
 
-        $this->assertTrue($result);
+        foreach ($result as $rowResult) {
+            $this->assertTrue($rowResult);
+        }
     }
 
     /**
@@ -67,7 +69,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
         $sql =
             "SELECT * FROM `test_table` LIMIT 1";
 
-        $result = $this->databaseConnection->read($sql);
+        $result = $this->databaseConnection->exe($sql);
 
         $this->assertEquals(1, count($result));
     }
@@ -98,9 +100,11 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
                 'text' => 'dihghdlfghadfihgdaifhgdfihghdfligh']
         ];
 
-        $result = $this->databaseConnection->write($sql, $values);
+        $result = $this->databaseConnection->exe($sql, $values);
 
-        $this->assertTrue($result);
+        foreach ($result as $rowResult) {
+            $this->assertTrue($rowResult);
+        }
     }
 
 
@@ -111,7 +115,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
     {
         $sql = "TRUNCATE TABLE `test_table`";
 
-        $result = $this->databaseConnection->write($sql);
+        $result = $this->databaseConnection->exe($sql);
 
         $this->assertTrue($result);
     }
@@ -123,7 +127,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
     {
         $sql = "DROP TABLE `test_table`";
 
-        $result = $this->databaseConnection->write($sql);
+        $result = $this->databaseConnection->exe($sql);
 
         $this->assertTrue($result, "Table dropped");
 

@@ -35,56 +35,44 @@ class DatabaseConnection
         $this->config = new DatabaseConfig($pathToIniFile);
     }
 
-    /**
-     * Write
-     *
-     * Use this function when inserting into or altering somthing in database.
-     * Any time nothing is expected to be returned, this is a good fit.
-     *
-     * @param string $sql a valid sql string.
-     * @param array $values values for prepared statement.
-     * @param bool $multi if the statement is supposed to be used several times.
-     * @return bool true on success, false on failure.
-     */
-    public function write(string $sql, array $values = []): bool
-    {
+
+    public function exe ($sql, $values = []) {
+
         $result = false;
 
         if (!$this->openConnection()) {
             return false;
         }
 
-        $this->prepareStatement($sql);
+        if (!$this->prepareStatement($sql) ) {
+            return false;
+        }
 
         if (empty($values)) {
+
             $result = $this->PDOStatement->execute();
-        } else { 
+
+        } else {
+
             foreach ($values as $valueSet) {
-                $result = $this->PDOStatement->execute($valueSet);
-                if (!$result) break;
+
+                $result[] = $this->PDOStatement->execute($valueSet);
+
+                if (!$result) {
+                    $message  = "Failed executing SQL Command";
+
+                    throw new VgaDatabaseException($message, $sql);
+                }
+
             }
         }
 
         $this->done();
 
         return $result;
+
     }
 
-    public function read(string $sql)
-    {
-        $result = [];
-
-        if ($this->openConnection()) {
-            $this->PDOStatement = $this->connection->prepare($sql);
-            if ($this->PDOStatement->execute()) {
-                $result = $this->PDOStatement->fetchAll();
-            }
-        }
-
-        $this->done();
-
-        return $result;
-    }
 
     /**
      * Resets the state of the connection
