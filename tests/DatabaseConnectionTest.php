@@ -31,6 +31,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
             )";
 
         $result = $this->databaseConnection->exe($sql);
+        $this->databaseConnection->done();
 
         $this->assertTrue($result);
     }
@@ -56,6 +57,8 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
 
         $result = $this->databaseConnection->exe($sql, $values);
 
+        $this->databaseConnection->done();
+
         foreach ($result as $rowResult) {
             $this->assertTrue($rowResult);
         }
@@ -70,6 +73,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
             "SELECT * FROM `test_table` LIMIT 1";
 
         $result = $this->databaseConnection->exe($sql);
+        $this->databaseConnection->done();
 
         $this->assertEquals(1, count($result));
     }
@@ -101,6 +105,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
         ];
 
         $result = $this->databaseConnection->exe($sql, $values);
+        $this->databaseConnection->done();
 
         foreach ($result as $rowResult) {
             $this->assertTrue($rowResult);
@@ -116,6 +121,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
         $sql = "TRUNCATE TABLE `test_table`";
 
         $result = $this->databaseConnection->exe($sql);
+        $this->databaseConnection->done();
 
         $this->assertTrue($result);
     }
@@ -128,6 +134,7 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
         $sql = "DROP TABLE `test_table`";
 
         $result = $this->databaseConnection->exe($sql);
+        $this->databaseConnection->done();
 
         $this->assertTrue($result, "Table dropped");
 
