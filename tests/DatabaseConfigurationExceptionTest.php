@@ -6,18 +6,18 @@
 use VgaDatabase\Exceptions\DatabaseConfigurationException;
 use PHPUnit\Framework\TestCase;
 
-class VgaDatabaseConfigurationExceptionTest extends TestCase
+class DatabaseConfigurationExceptionTest extends TestCase
 {
 
     private $message = "Exception Test";
-    private $pathToIniFile = "database_test.ini";
+    private $pathToIniFile = __DIR__ . "/database_test.ini";
     private $faultySettings = [];
     private $errorCode = 0;
 
     /**
      * @throws DatabaseConfigurationException
      */
-    function testDatabaseConfigExceptionIsThrown()
+    function testCanThrowException()
     {
         $this->expectException(DatabaseConfigurationException::class);
 

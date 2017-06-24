@@ -6,18 +6,16 @@
 use VgaDatabase\Exceptions\DatabaseConnectionException;
 use PHPUnit\Framework\TestCase;
 
-class VgaDatabaseExceptionTest extends TestCase
+class DatabaseExceptionTest extends TestCase
 {
-    function testIsCorrectExceptionThrown()
+    function testCanThrowException()
     {
             $this->expectException(DatabaseConnectionException::class);
 
             $message = "";
-            $sql = "";
             $prevException = null;
-            $pdoException = null;
 
-            throw new DatabaseConnectionException($message, $sql, $prevException, $pdoException);
+            throw new DatabaseConnectionException($message,$prevException);
 
     }
 }
