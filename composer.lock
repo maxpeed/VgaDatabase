@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "vgait/vga-exception",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/maxpeed/VgaException.git",
-                "reference": "e79bf46b064b339c59ea18b351344f386293721e"
+                "reference": "621a17bef6900801a798ffe413dc00ae100fb02b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/maxpeed/VgaException/zipball/e79bf46b064b339c59ea18b351344f386293721e",
-                "reference": "e79bf46b064b339c59ea18b351344f386293721e",
+                "url": "https://api.github.com/repos/maxpeed/VgaException/zipball/621a17bef6900801a798ffe413dc00ae100fb02b",
+                "reference": "621a17bef6900801a798ffe413dc00ae100fb02b",
                 "shasum": ""
             },
             "require": {
@@ -29,7 +29,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "VgaException\\": "src/"
+                    "Vgait\\VgaException\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -45,7 +45,7 @@
                 }
             ],
             "description": "Vga Exception base class",
-            "time": "2017-06-24T17:13:48+00:00"
+            "time": "2017-06-24T21:16:32+00:00"
         }
     ],
     "packages-dev": [

@@ -3,13 +3,13 @@
  * Created: 2017-01-01 23:13
  */
 
-namespace VgaDatabase\Exceptions;
+namespace Vgait\VgaDatabase\Exceptions;
 
 
 use PDOException;
 use Throwable;
-use VgaException\VgaException;
-use VgaException\VgaExceptionType;
+use Vgait\VgaException\VgaException;
+use Vgait\VgaException\VgaExceptionType;
 
 class DatabaseConnectionException extends VgaException
 {

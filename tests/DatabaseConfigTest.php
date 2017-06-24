@@ -3,7 +3,7 @@
  * Created: 2017-02-19 17:54
  */
 
-use VgaDatabase\DatabaseConfig;
+use Vgait\VgaDatabase\DatabaseConfig;
 
 class DatabaseConfigTest extends \PHPUnit\Framework\TestCase
 {

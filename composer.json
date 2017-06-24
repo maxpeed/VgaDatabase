@@ -8,11 +8,11 @@
   },
   "autoload": {
     "psr-4": {
-      "VgaDatabase\\": "src/"
+      "Vgait\\VgaDatabase\\": "src/"
     }
   },
   "autoload-dev": {
-    "VgaDatabase\\Tests": "tests/"
+    "Vgait\\VgaDatabase\\Tests": "tests/"
   },
   "require-dev": {
     "phpunit/phpunit": "^6.0"

@@ -3,11 +3,11 @@
  * Created: 2017-02-19 14:57
  */
 
-namespace VgaDatabase;
+namespace Vgait\VgaDatabase;
 
 use Exception;
 use \PDO;
-use \VgaDatabase\Exceptions\DatabaseConfigurationException;
+use Vgait\VgaDatabase\Exceptions\DatabaseConfigurationException;
 
 class DatabaseConfig
 {

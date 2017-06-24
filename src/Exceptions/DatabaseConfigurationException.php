@@ -3,10 +3,10 @@
  * Created: 2017-02-19 16:10
  */
 
-namespace VgaDatabase\Exceptions;
+namespace Vgait\VgaDatabase\Exceptions;
 
-use VgaException\VgaException;
-use VgaException\VgaExceptionType;
+use Vgait\VgaException\VgaException;
+use Vgait\VgaException\VgaExceptionType;
 
 class DatabaseConfigurationException extends VgaException
 {

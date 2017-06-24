@@ -3,13 +3,13 @@
  * Created: 2017-02-19 20:53
  */
 
-namespace VgaDatabase;
+namespace Vgait\VgaDatabase;
 
 use \PDO;
 use PDOException;
-use VgaDatabase\Exceptions\DatabaseConfigurationException;
-use VgaDatabase\Exceptions\DatabaseConnectionException;
-use VgaException\VgaException;
+use Vgait\VgaDatabase\Exceptions\DatabaseConfigurationException;
+use Vgait\VgaDatabase\Exceptions\DatabaseConnectionException;
+use Vgait\VgaException\VgaException;
 
 
 /**

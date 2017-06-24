@@ -3,7 +3,7 @@
  * Created: 2017-06-24 19:36
  */
 
-use VgaDatabase\Exceptions\DatabaseConnectionException;
+use Vgait\VgaDatabase\Exceptions\DatabaseConnectionException;
 use PHPUnit\Framework\TestCase;
 
 class DatabaseExceptionTest extends TestCase

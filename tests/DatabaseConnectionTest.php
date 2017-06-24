@@ -4,8 +4,8 @@
  */
 
 
-use VgaDatabase\DatabaseConnection;
-use VgaException\VgaException;
+use Vgait\VgaDatabase\DatabaseConnection;
+use Vgait\VgaException\VgaException;
 
 /**
  * Class DatabaseConnectionTest
