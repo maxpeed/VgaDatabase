@@ -5,26 +5,32 @@
 
 namespace VgaDatabase\Exceptions;
 
+use VgaException\VgaException;
+use VgaException\VgaExceptionType;
+
 class VgaDatabaseConfigurationException extends VgaException
 {
-    protected $pathToIniFile;
-    protected $faultySettings;
+    protected $pathToIniFile = "";
+    protected $faultySettings = [];
 
     /**
      * VgaDatabaseConfigurationException constructor.
      *
+     * @param string $message
      * @param string $pathToIniFile
      * @param array $faultySettings
+     * @param VgaExceptionType|null $previousException
      */
     public function __construct(
-        string $message,
+        string $message = "",
         string $pathToIniFile = null,
         array $faultySettings = [],
-        VgaException $previousException = null)
+        VgaExceptionType $previousException = null)
     {
         $this->pathToIniFile = $pathToIniFile;
         $this->faultySettings = $faultySettings;
-        parent::__construct($message, $previousException);
+        $errorCode = 0;
+        parent::__construct($message, $errorCode, $previousException);
     }
 
     /**
@@ -32,18 +38,29 @@ class VgaDatabaseConfigurationException extends VgaException
      */
     public function toPrintableString(): string
     {
-        $string = "
-            <p>VgaDatabase Configuration error: {$this->message}</p>
-            <p>Path to INI file: {$this->pathToIniFile}</p>";
 
+        return sprintf(
+            "VgaDatabaseConfigurationException: " . PHP_EOL
+            . "%s" . PHP_EOL
+            . "Settings file: %s" . PHP_EOL
+            . "Current Settings: %s" . PHP_EOL,
+
+            parent::toPrintableString(),
+            $this->pathToIniFile,
+            $this->settingsToString()
+        );
+
+    }
+
+    private function settingsToString()
+    {
+        $string = "";
         if (!empty($this->faultySettings)) {
-            $string .= "<pre>";
 
             foreach ($this->faultySettings as $setting => $value) {
-                $string .= "[ $setting => $value ]<br>";
+                $string .= "[ $setting => $value ]" . PHP_EOL;
             }
 
-            $string .= "</pre>";
         }
 
         return $string;
