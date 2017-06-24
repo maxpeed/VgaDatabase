@@ -7,16 +7,24 @@ namespace VgaDatabase\Exceptions;
 
 class VgaDatabaseConfigurationException extends VgaException
 {
-    protected  $faultySettings;
+    protected $pathToIniFile;
+    protected $faultySettings;
 
     /**
      * VgaDatabaseConfigurationException constructor.
-     * @param array $settings
+     *
+     * @param string $pathToIniFile
+     * @param array $faultySettings
      */
-    public function __construct(array $settings)
+    public function __construct(
+        string $message,
+        string $pathToIniFile = null,
+        array $faultySettings = [],
+        VgaException $previousException = null)
     {
-        $this->faultySettings = $settings;
-        parent::__construct();
+        $this->pathToIniFile = $pathToIniFile;
+        $this->faultySettings = $faultySettings;
+        parent::__construct($message, $previousException);
     }
 
     /**
@@ -24,14 +32,19 @@ class VgaDatabaseConfigurationException extends VgaException
      */
     public function toPrintableString(): string
     {
-        $string = "<p>VgaDatabase Configuration error: {$this->getMessage()}</p>
-                    <pre>";
+        $string = "
+            <p>VgaDatabase Configuration error: {$this->message}</p>
+            <p>Path to INI file: {$this->pathToIniFile}</p>";
 
-        foreach ($this->faultySettings as $setting => $value) {
-            $string .= "[ $setting => $value ]<br>";
+        if (!empty($this->faultySettings)) {
+            $string .= "<pre>";
+
+            foreach ($this->faultySettings as $setting => $value) {
+                $string .= "[ $setting => $value ]<br>";
+            }
+
+            $string .= "</pre>";
         }
-
-        $string .= "</pre>";
 
         return $string;
     }

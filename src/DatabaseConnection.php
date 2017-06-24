@@ -14,161 +14,87 @@ use VgaDatabase\Exceptions\VgaDatabaseException;
 /**
  * Class DatabaseConnection
  * @package VgaDatabase
+ *
+ * Purpose:
+ *  Wrap database connection and PDO statement in a single class.
+ * Usage:
+ *  Inject SQL string, execute it with a set of values. Fetch result if applicable.
+ *  Everything else is handled.
  */
 class DatabaseConnection
 {
     /** @var DatabaseConfig */
-    private $config = null;
+    private $configuration = null;
 
     /** @var PDO */
-    private $connection = null;
+    private $pdo = null;
 
     /** @var \PDOStatement */
-    private $PDOStatement = null;
+    private $pdoStatement = null;
 
     /**
      * DatabaseConnection constructor.
+     *
      * @param string $pathToIniFile
      */
     public function __construct(string $pathToIniFile)
     {
-        $this->config = new DatabaseConfig($pathToIniFile);
+        try {
+
+            $this->configuration = new DatabaseConfig($pathToIniFile);
+
+        } catch (VgaDatabaseConfigurationException $e) {
+            $message = "Database configuration failed.";
+            $sql = null;
+
+            throw new VgaDatabaseConfigurationException($message, null, null, $e);
+        }
     }
-
-
-    public function exe ($sql, $values = []) {
-
-        $result = false;
-
-        if (!$this->openConnection()) {
-            return false;
-        }
-
-        if (!$this->prepareStatement($sql) ) {
-            return false;
-        }
-
-        if (empty($values)) {
-
-            $result = $this->PDOStatement->execute();
-
-        } else {
-
-            foreach ($values as $valueSet) {
-
-                $result[] = $this->PDOStatement->execute($valueSet);
-
-                if (!$result) {
-                    $message  = "Failed executing SQL Command";
-
-                    throw new VgaDatabaseException($message, $sql);
-                }
-
-            }
-        }
-
-        $this->done();
-
-        return $result;
-
-    }
-
 
     /**
-     * Resets the state of the connection
+     * DatabaseConnection destructor.
      *
-     * This will close the current statement and release the connection for use in another place. It is very
-     * important that you call this function when your current request is done.
+     * Destroy all data, and close connection.
      */
-    public function done()
+    public function __destruct()
     {
-        $this->PDOStatement = null;
+        $this->pdoStatement = null;
+        $this->pdo = null;
     }
 
     /**
-     * Creates the database connection
-     *
-     * In reality this just creates an instance of the PDO class
-     *
-     * @return bool
-     * @throws VgaDatabaseException if connection fails
-     */
-    private function openConnection(): bool
-    {
-        if (!$this->isConnected()) {
-
-            $dsn = $this->config->getDsn();
-            $user = $this->config->getUser();
-            $password = $this->config->getPassword();
-            $options = $this->config->getOptions();
-
-            try {
-
-                $this->connection = new PDO($dsn, $user, $password, $options);
-
-            } catch (PDOException $PDOException) {
-                $message = "Error when trying to connect to database";
-                $sql = ""; // Irrelevant
-                $prevVgaException = null; // None
-
-                throw new VgaDatabaseException($message, $sql, $prevVgaException, $PDOException);
-            }
-        }
-
-        return $this->isConnected();
-    }
-
-    /**
-     * This will close the connection to the database.
-     *
-     * Call this function when you know you are not going to use it any more, like at the end of your script.
-     */
-    public function closeConnection()
-    {
-        $this->connection = null;
-    }
-
-    /**
-     * Tests if there is a connection to the database
-     *
-     * This just checks if there is an instance of a PDO class
-     *
      * @return bool
      */
-    private function isConnected(): bool
-    {
-        return (
-            !empty($this->connection)
-            && is_a($this->connection, PDO::class)
-        );
+    public function connect () {
+
+        return $this->openConnection();
+
     }
 
     /**
-     * Prepare values and the PDO Statement
-     *
-     * @param string $sql the SQL string
      * @return bool
      * @throws VgaDatabaseException
      */
-    private function prepareStatement(string $sql): bool
+    private function openConnection(): bool
     {
-        $result = false;
+        $dsn = $this->configuration->getDsn();
+        $user = $this->configuration->getUser();
+        $password = $this->configuration->getPassword();
+        $options = $this->configuration->getOptions();
 
         try {
 
-            $this->PDOStatement = $this->connection->prepare($sql);
+            $this->pdo = new PDO($dsn, $user, $password, $options);
+            return true;
 
         } catch (PDOException $PDOException) {
-            $message = "Error when preparing the statement";
-            $prevVgaExeption = null;
-            throw new VgaDatabaseException($message, $sql, $prevVgaExeption, $PDOException);
+            $message = "Error when trying to connect to database";
+            $sql = ""; // Irrelevant
+            $prevVgaException = null; // None
+
+            throw new VgaDatabaseException($message, $sql, $prevVgaException, $PDOException);
         }
 
-        if ($this->PDOStatement) {
-            $result = true;
-        }
-
-        return $result;
     }
 
 }

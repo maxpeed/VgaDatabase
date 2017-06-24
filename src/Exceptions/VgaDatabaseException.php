@@ -6,6 +6,8 @@
 namespace VgaDatabase\Exceptions;
 
 use PDOException;
+use VgaException\VgaException;
+use VgaException\VgaExceptionType;
 
 class VgaDatabaseException extends VgaException
 {
@@ -18,13 +20,22 @@ class VgaDatabaseException extends VgaException
 
     /**
      * VgaDatabaseException constructor.
+     *
+     * @param string $message
+     * @param string $sql
+     * @param VgaExceptionType|null $previousException
+     * @param PDOException|null $PDOException
      */
-    public function __construct($message = "", $sql = "", VgaException $previousException = null, PDOException $PDOException = null)
+    public function __construct(string $message = "",
+                                string $sql = "",
+                                VgaExceptionType $previousException = null,
+                                PDOException $PDOException = null)
     {
         $this->sql = $sql;
         $this->originalPdoExeption = $PDOException;
+        $errorCode = 0;
 
-        parent::__construct($message, $previousException);
+        parent::__construct($message, $errorCode, $previousException);
     }
 
     /**
@@ -34,15 +45,15 @@ class VgaDatabaseException extends VgaException
      */
     public function toPrintableString(): string
     {
-        $msg = !empty($this->msg) ?
-            "<p>Message: {$this->getMessage()}</p>" : "";
+        return sprintf(
+            "VgaDatabaseException thrown. " . PHP_EOL
+            . "%s" . PHP_EOL
+            . "SQL: %s" . PHP_EOL
+            . "PDO Message: %s" . PHP_EOL,
 
-        $sql = !empty($this->sql) ?
-            " <pre>{$this->sql}</pre>" : "";
-
-        $PDOErrorMessage = !empty($this->previousVgaException) ?
-            $this->originalPdoExeption->getMessage() : "";
-
-        return "$msg $sql $PDOErrorMessage";
+            parent::toPrintableString(),
+            $this->sql,
+            empty($this->originalPdoExeption->getMessage()) ? null : $this->originalPdoExeption->getMessage()
+        );
     }
 }

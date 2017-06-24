@@ -2,3 +2,4 @@
 .idea*
 .subl*
 /vendor
+/tests/unit

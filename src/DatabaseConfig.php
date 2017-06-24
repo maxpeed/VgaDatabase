@@ -68,7 +68,7 @@ class DatabaseConfig
     /**
      * @param string $pathToIni path to the ini file containing the settings
      * @return array an array of parsed settings
-     * @throws Exception
+     * @throws VgaDatabaseConfigurationException
      */
     private function parseIni(string $pathToIni): array
     {
@@ -82,7 +82,9 @@ class DatabaseConfig
         ) {
             return $parsedIniArray;
         } else {
-            throw new Exception("Error when parsing INI File, perhaps wrong format or path: $pathToIni");
+            $message = "Failed parsing settings INI file.";
+
+            throw new VgaDatabaseConfigurationException($message, $pathToIni, $parsedIniArray);
         }
     }
 
