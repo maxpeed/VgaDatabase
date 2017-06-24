@@ -5,130 +5,68 @@
 
 
 use VgaDatabase\DatabaseConnection;
+use VgaException\VgaException;
 
-
+/**
+ * Class DatabaseConnectionTest
+ *
+ * This test requires a "tests" database to be setup, and a config file named
+ * database_test.ini with correct credentials to be placed in this folder
+ *
+ */
 class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
 {
+
+    /** @var string */
     protected $pathToIniFile = __DIR__ . '/database_test.ini';
+
+    /** @var string  */
+    protected $pathToFaultySettingsFile = __DIR__ . '/database_test_faulty.ini';
+
+    /** @var string  */
+    protected $pathToErrorSettingsFile = __DIR__ . '/database_test_error.ini';
 
     /** @var DatabaseConnection */
     protected $databaseConnection;
 
 
-    public function setUp()
+    public function testCanConnect()
     {
-        $this->databaseConnection = new DatabaseConnection($this->pathToIniFile);
+        $connection = $this->connect($this->pathToIniFile);
+        $this->assertTrue($connection->isConnected());
     }
 
-
-    public function testCanCreateATable()
+    public function testCanDisconnect()
     {
-        $sql =
-            "CREATE TABLE IF NOT EXISTS `test_table` (
-                id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                field_int INT(10) NOT NULL,
-                field_char VARCHAR(10) NOT NULL,
-                field_text TEXT
-            )";
+        $connection =$this->connect($this->pathToIniFile);
+        $connection->disconnect();
 
-        $result = $this->databaseConnection->write($sql);
-
-        $this->assertTrue($result);
+        $this->assertFalse($connection->isConnected());
     }
 
-    /**
-     * @depends testCanCreateATable
-     */
-    public function testCanWriteToTable()
+    public function testThrowsConfigurationException()
     {
-        $sql =
-            "INSERT INTO `test_table`
-              (`field_int`, `field_char`, `field_text`)
-            VALUES 
-              (:int, :char, :text)";
+        $this->expectException(VgaException::class);
 
-        $values = [
-            'int' => 1234,
-            'char' => 'A String',
-            'text' => 'Some Text for this field'
-        ];
+        // Should test first error in stack!
 
-        $result = $this->databaseConnection->write($sql, $values);
-
-        $this->assertTrue($result);
-    }
-
-    /**
-     * @depends testCanWriteToTable
-     */
-    public function testCanReadOneRowFromATable()
-    {
-        $sql =
-            "SELECT * FROM `test_table` LIMIT 1";
-
-        $result = $this->databaseConnection->read($sql);
-
-        $this->assertEquals(1, count($result));
-    }
-
-    /**
-     * @depends testCanWriteToTable
-     */
-    public function testCanWriteManyRowsToTable()
-    {
-        $sql =
-            "INSERT INTO `test_table`
-              (`field_int`, `field_char`, `field_text`)
-            VALUES 
-              (:int, :char, :text)";
-
-        $values = [
-            [
-                'int' => 1234,
-                'char' => 'A String',
-                'text' => 'Some Text for this field'],
-            [
-                'int' => 25325235,
-                'char' => 'Another String',
-                'text' => 'Some Text for this field again'],
-            [
-                'int' => 28593,
-                'char' => 'A String for lks',
-                'text' => 'dihghdlfghadfihgdaifhgdfihghdfligh']
-        ];
-
-        $multi = true;
-
-        $result = $this->databaseConnection->write($sql, $values, $multi);
-
-        $this->assertTrue($result);
-    }
-
-
-    /**
-     * @depends testCanWriteToTable
-     */
-    public function testCanEmptyATable()
-    {
-        $sql = "TRUNCATE TABLE `test_table`";
-
-        $result = $this->databaseConnection->write($sql);
-
-        $this->assertTrue($result);
-    }
-
-    /**
-     * @depends testCanCreateATable
-     */
-    public function testCanDropATable()
-    {
-        $sql = "DROP TABLE `test_table`";
-
-        $result = $this->databaseConnection->write($sql);
-
-        $this->assertTrue($result, "Table dropped");
+        $this->connect($this->pathToErrorSettingsFile);
 
     }
 
+    public function testThrowsConnectionException()
+    {
+        $this->expectException(VgaException::class);
+
+        $this->connect($this->pathToFaultySettingsFile);
+
+
+    }
+
+    public function connect ($settingsFile) {
+        $connection =  new DatabaseConnection($settingsFile);
+        $connection->connect();
+        return $connection;
+    }
 
 }

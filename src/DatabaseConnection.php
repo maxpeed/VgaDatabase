@@ -6,88 +6,119 @@
 namespace VgaDatabase;
 
 use \PDO;
-use VgaDatabase\Exceptions\VgaConnectionException;
+use PDOException;
+use VgaDatabase\Exceptions\DatabaseConfigurationException;
+use VgaDatabase\Exceptions\DatabaseConnectionException;
+use VgaException\VgaException;
 
 
+/**
+ * Class DatabaseConnection
+ * @package VgaDatabase
+ *
+ * Purpose:
+ *  Wrap database connection and PDO statement in a single class.
+ * Usage:
+ *  Inject SQL string, execute it with a set of values. Fetch result if applicable.
+ *  Everything else is handled.
+ */
 class DatabaseConnection
 {
     /** @var DatabaseConfig */
-    private $config = null;
+    private $configuration = null;
 
     /** @var PDO */
-    private $connection = null;
+    private $pdo = null;
 
     /** @var \PDOStatement */
-    private $PDOStatement;
+    private $pdoStatement = null;
 
+    /**
+     * DatabaseConnection constructor.
+     *
+     * @param string $pathToIniFile
+     * @throws VgaException
+     */
     public function __construct(string $pathToIniFile)
     {
-        $this->config = new DatabaseConfig($pathToIniFile);
-    }
+        try {
 
-    public function write(string $sql, array $values = [], $multi = false): bool
-    {
-        $result = false;
+            $this->configuration = new DatabaseConfig($pathToIniFile);
 
-        if ($this->connect()) {
-            $this->PDOStatement = $this->connection->prepare($sql);
+        } catch (DatabaseConfigurationException $e) {
+            $message = "Database configuration failed.";
+            $sql = null;
+            $errorCode = 0;
 
-            if (!$multi) {
-                $values = [$values];
-            }
-
-            foreach ($values as $valueSet) {
-                $result = $this->PDOStatement->execute($valueSet);
-                if ( !$result ) break;
-            }
-
-
+            throw new VgaException($message, $errorCode, $e);
         }
-        $this->PDOStatement = null;
-        return $result;
     }
 
-    public function read(string $sql)
+    /**
+     * DatabaseConnection destructor.
+     *
+     * Destroy all data, and close connection.
+     */
+    public function __destruct()
     {
-        $result = [];
-
-        if ($this->connect()) {
-            $this->PDOStatement = $this->connection->prepare($sql);
-            if ($this->PDOStatement->execute()) {
-                $result = $this->PDOStatement->fetchAll();
-            }
-        }
-
-        $this->PDOStatement = null;
-        return $result;
+        $this->disconnect();
     }
 
-    public function close() {
-        $this->connection = null;
-    }
-
-    private function connect(): bool
+    /**
+     * Redoes connection to the database.
+     *
+     * Will throw a VgaDatabaseException on error in connection.
+     *
+     * @return bool
+     * @throws DatabaseConnectionException
+     */
+    public function connect(): bool
     {
-        if (!$this->isConnected()) {
-            try {
-                $dsn = $this->config->getDsn();
-                $user = $this->config->getUser();
-                $password = $this->config->getPassword();
-                $options = $this->config->getOptions();
-                $this->connection = new PDO($dsn, $user, $password, $options);
-            } catch (\PDOException $exception) {
-                throw new VgaConnectionException($this->config);
-            }
+        if (is_a($this->pdo, PDO::class)) {
+            return true;
         }
 
-        return $this->isConnected();
+        $dsn = $this->configuration->getDsn();
+        $user = $this->configuration->getUser();
+        $password = $this->configuration->getPassword();
+        $options = $this->configuration->getOptions();
+
+        try {
+
+            if ($this->pdo = new PDO($dsn, $user, $password, $options)) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (PDOException $PDOException) {
+
+            $message = "Error when trying to connect to database";
+            $previousException = $PDOException;
+
+            throw new DatabaseConnectionException($message, $previousException);
+        }
+
     }
 
-    private function isConnected(): bool
+    /**
+     * @return bool
+     */
+    public function isConnected(): bool
     {
-        return (
-            !empty($this->connection)
-            && is_a($this->connection, PDO::class)
-        );
+        return is_a($this->pdo, PDO::class);
     }
+
+    /**
+     * @return bool
+     */
+    public function disconnect(): bool
+    {
+        $this->pdoStatement = null;
+        $this->pdo = null;
+
+        return true;
+
+    }
+
 }
