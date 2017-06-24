@@ -7,8 +7,9 @@ namespace VgaDatabase;
 
 use \PDO;
 use PDOException;
-use VgaDatabase\Exceptions\VgaDatabaseConfigurationException;
-use VgaDatabase\Exceptions\VgaDatabaseException;
+use VgaDatabase\Exceptions\DatabaseConfigurationException;
+use VgaDatabase\Exceptions\DatabaseConnectionException;
+use VgaException\VgaException;
 
 
 /**
@@ -36,6 +37,7 @@ class DatabaseConnection
      * DatabaseConnection constructor.
      *
      * @param string $pathToIniFile
+     * @throws VgaException
      */
     public function __construct(string $pathToIniFile)
     {
@@ -43,11 +45,12 @@ class DatabaseConnection
 
             $this->configuration = new DatabaseConfig($pathToIniFile);
 
-        } catch (VgaDatabaseConfigurationException $e) {
+        } catch (DatabaseConfigurationException $e) {
             $message = "Database configuration failed.";
             $sql = null;
+            $errorCode = 0;
 
-            throw new VgaDatabaseConfigurationException($message, null, null, $e);
+            throw new VgaException($message, $errorCode, $e);
         }
     }
 
@@ -58,25 +61,23 @@ class DatabaseConnection
      */
     public function __destruct()
     {
-        $this->pdoStatement = null;
-        $this->pdo = null;
+        $this->disconnect();
     }
 
     /**
+     * Redoes connection to the database.
+     *
+     * Will throw a VgaDatabaseException on error in connection.
+     *
      * @return bool
+     * @throws DatabaseConnectionException
      */
-    public function connect () {
-
-        return $this->openConnection();
-
-    }
-
-    /**
-     * @return bool
-     * @throws VgaDatabaseException
-     */
-    private function openConnection(): bool
+    public function connect(): bool
     {
+        if (is_a($this->pdo, PDO::class)) {
+            return true;
+        }
+
         $dsn = $this->configuration->getDsn();
         $user = $this->configuration->getUser();
         $password = $this->configuration->getPassword();
@@ -84,16 +85,39 @@ class DatabaseConnection
 
         try {
 
-            $this->pdo = new PDO($dsn, $user, $password, $options);
-            return true;
+            if ($this->pdo = new PDO($dsn, $user, $password, $options)) {
+                return true;
+            } else {
+                return false;
+            }
 
         } catch (PDOException $PDOException) {
-            $message = "Error when trying to connect to database";
-            $sql = ""; // Irrelevant
-            $prevVgaException = null; // None
 
-            throw new VgaDatabaseException($message, $sql, $prevVgaException, $PDOException);
+            $message = "Error when trying to connect to database";
+            $previousException = $PDOException;
+
+            throw new DatabaseConnectionException($message, $previousException);
         }
+
+    }
+
+    /**
+     * @return bool
+     */
+    public function isConnected(): bool
+    {
+        return is_a($this->pdo, PDO::class);
+    }
+
+    /**
+     * @return bool
+     */
+    public function disconnect(): bool
+    {
+        $this->pdoStatement = null;
+        $this->pdo = null;
+
+        return true;
 
     }
 

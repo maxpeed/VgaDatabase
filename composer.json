@@ -2,7 +2,7 @@
   "name": "vgait/vgadatabase",
   "description": "This is a database abstraction for easy instantiation and usage of PDO",
   "require": {
-    "php": ">=7.0.0",
+    "php": ">=7.1.0",
     "ext-pdo": "*",
     "vgait/vga-exception": "^1.0"
   },

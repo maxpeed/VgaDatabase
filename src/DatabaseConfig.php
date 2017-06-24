@@ -7,7 +7,7 @@ namespace VgaDatabase;
 
 use Exception;
 use \PDO;
-use \VgaDatabase\Exceptions\VgaDatabaseConfigurationException;
+use \VgaDatabase\Exceptions\DatabaseConfigurationException;
 
 class DatabaseConfig
 {
@@ -68,23 +68,23 @@ class DatabaseConfig
     /**
      * @param string $pathToIni path to the ini file containing the settings
      * @return array an array of parsed settings
-     * @throws VgaDatabaseConfigurationException
+     * @throws DatabaseConfigurationException
      */
     private function parseIni(string $pathToIni): array
     {
         $parsedIniArray = parse_ini_file($pathToIni);
 
         if (!empty($parsedIniArray['host'])
-            || !empty($parsedIniArray['database'])
-            || !empty($parsedIniArray['user'])
-            || !empty($parsedIniArray['password'])
-            || !empty($parsedIniArray['charset'])
+            && !empty($parsedIniArray['database'])
+            && !empty($parsedIniArray['user'])
+            && !empty($parsedIniArray['password'])
+            && !empty($parsedIniArray['charset'])
         ) {
             return $parsedIniArray;
         } else {
             $message = "Failed parsing settings INI file.";
 
-            throw new VgaDatabaseConfigurationException($message, $pathToIni, $parsedIniArray);
+            throw new DatabaseConfigurationException($message, $pathToIni, $parsedIniArray);
         }
     }
 

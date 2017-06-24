@@ -3,7 +3,7 @@
  * Created: 2017-06-24 20:13
  */
 
-use VgaDatabase\Exceptions\VgaDatabaseConfigurationException;
+use VgaDatabase\Exceptions\DatabaseConfigurationException;
 use PHPUnit\Framework\TestCase;
 
 class VgaDatabaseConfigurationExceptionTest extends TestCase
@@ -15,13 +15,13 @@ class VgaDatabaseConfigurationExceptionTest extends TestCase
     private $errorCode = 0;
 
     /**
-     * @throws VgaDatabaseConfigurationException
+     * @throws DatabaseConfigurationException
      */
     function testDatabaseConfigExceptionIsThrown()
     {
-        $this->expectException(VgaDatabaseConfigurationException::class);
+        $this->expectException(DatabaseConfigurationException::class);
 
-        throw new VgaDatabaseConfigurationException();
+        throw new DatabaseConfigurationException();
     }
 
     function testCanGetPrintableString()
@@ -29,12 +29,12 @@ class VgaDatabaseConfigurationExceptionTest extends TestCase
         $this->faultySettings = $this->generateSettingsArray();
 
         try {
-            throw new VgaDatabaseConfigurationException(
+            throw new DatabaseConfigurationException(
                 $this->message,
                 $this->pathToIniFile,
                 $this->faultySettings
             );
-        } catch (VgaDatabaseConfigurationException $configurationException) {
+        } catch (DatabaseConfigurationException $configurationException) {
             $stringShouldStartWith = "VgaDatabaseConfigurationException:";
 
             echo $configurationException->toPrintableString();

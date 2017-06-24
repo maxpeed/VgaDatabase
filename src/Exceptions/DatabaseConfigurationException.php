@@ -8,7 +8,7 @@ namespace VgaDatabase\Exceptions;
 use VgaException\VgaException;
 use VgaException\VgaExceptionType;
 
-class VgaDatabaseConfigurationException extends VgaException
+class DatabaseConfigurationException extends VgaException
 {
     protected $pathToIniFile = "";
     protected $faultySettings = [];
