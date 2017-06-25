@@ -38,7 +38,8 @@ class DatabaseQueryTest extends TestCase
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
         $dbquery = new DatabaseQuery($this->dbInstance, $sql);
-        $expectedState = 10;
+        $dbquery->execute();
+        $expectedState = DatabaseQuery::STATE_EXECUTED;
 
         $this->assertEquals($expectedState, $dbquery->state());
     }
