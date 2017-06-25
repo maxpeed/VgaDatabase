@@ -20,10 +20,10 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
     /** @var string */
     protected $pathToIniFile = __DIR__ . '/database_test.ini';
 
-    /** @var string  */
+    /** @var string */
     protected $pathToFaultySettingsFile = __DIR__ . '/database_test_faulty.ini';
 
-    /** @var string  */
+    /** @var string */
     protected $pathToErrorSettingsFile = __DIR__ . '/database_test_error.ini';
 
     /** @var DatabaseConnection */
@@ -38,10 +38,20 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
 
     public function testCanDisconnect()
     {
-        $connection =$this->connect($this->pathToIniFile);
+        $connection = $this->connect($this->pathToIniFile);
         $connection->disconnect();
 
         $this->assertFalse($connection->isConnected());
+    }
+
+    public function testCanGetQueryObject()
+    {
+        $sql = "SELECT * FROM `test`";
+
+        $connection = $this->connect($this->pathToIniFile);
+        $dbquery = $connection->getQuery($sql);
+
+        $this->assertTrue(is_a($dbquery, \Vgait\VgaDatabase\DatabaseQuery::class));
     }
 
     public function testThrowsConfigurationException()
@@ -63,8 +73,9 @@ class DatabaseConnectionTest extends PHPUnit\Framework\TestCase
 
     }
 
-    public function connect ($settingsFile) {
-        $connection =  new DatabaseConnection($settingsFile);
+    private function connect($settingsFile)
+    {
+        $connection = new DatabaseConnection($settingsFile);
         $connection->connect();
         return $connection;
     }
