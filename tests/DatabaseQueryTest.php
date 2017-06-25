@@ -11,7 +11,7 @@ class DatabaseQueryTest extends TestCase
 {
     /** @var string */
     protected $settingsFile = __DIR__ . '/database_test.ini';
-    private $connection;
+    private $dbInstance;
 
     /**
      * Set up current test
@@ -21,11 +21,13 @@ class DatabaseQueryTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->connection = new DatabaseConnection($this->settingsFile);
+        $this->dbInstance = new DatabaseConnection($this->settingsFile);
+        $this->dbInstance->connect();
     }
 
     public function testCreateTable()
     {
+
         $sql =
             "CREATE TABLE `test` (
                   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -35,9 +37,10 @@ class DatabaseQueryTest extends TestCase
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-        $dbquery = new DatabaseQuery($this->connection, $sql);
+        $dbquery = new DatabaseQuery($this->dbInstance, $sql);
+        $expectedState = 10;
 
-        $this->assertTrue($dbquery->state());
+        $this->assertEquals($expectedState, $dbquery->state());
     }
 
     public function testInsertData()
@@ -97,7 +100,7 @@ class DatabaseQueryTest extends TestCase
 
     private function createDbQuery($sql)
     {
-        $dbquery = new DatabaseQuery($this->connection, $sql);
+        $dbquery = new DatabaseQuery($this->dbInstance, $sql);
 
         return $dbquery->state();
     }

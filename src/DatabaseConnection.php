@@ -30,9 +30,6 @@ class DatabaseConnection
     /** @var PDO */
     private $pdo = null;
 
-    /** @var \PDOStatement */
-    private $pdoStatement = null;
-
     /**
      * DatabaseConnection constructor.
      *
@@ -74,7 +71,7 @@ class DatabaseConnection
      */
     public function connect(): bool
     {
-        if (is_a($this->pdo, PDO::class)) {
+        if ($this->isConnected()) {
             return true;
         }
 
@@ -99,6 +96,18 @@ class DatabaseConnection
             throw new DatabaseConnectionException($message, $previousException);
         }
 
+    }
+
+    /**
+     * Gets a DatabaseQuery Object from the SQL string passed.
+     *
+     * @param $sql
+     * @return DatabaseQuery
+     */
+    public function getQuery($sql): DatabaseQuery
+    {
+        $this->connect();
+        return new DatabaseQuery($this->pdo->prepare($sql));
     }
 
     /**
