@@ -1,4 +1,4 @@
-#VgaDatabase - Yet Another PDO Abstraction Layer
+# VgaDatabase - Yet Another PDO Abstraction Layer
 
 Just use this to save some code. This is not a query builder, ypu still have to write your own 
 SQL commands.
