@@ -30,6 +30,7 @@ class DatabaseQueryTest extends TestCase
 
     public function testCreateTable()
     {
+        echo PHP_EOL;
         $sql =
           "CREATE TABLE `test` (
                   `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -39,14 +40,23 @@ class DatabaseQueryTest extends TestCase
             PRIMARY KEY (`id`) )
             ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-        $state = $this->executeQuery($sql);
+        // $state = $this->dbInstance->getQuery($sql)->execute()->getState();
+        $state = $this->dbInstance->getQuery($sql)
+                                  ->execute();
 
-        $expectedState = DatabaseQuery::STATE_EXECUTED;
+        $expectedState = TRUE;
         $this->assertEquals($expectedState, $state);
+        echo __FUNCTION__ . ": Reported state = $state - expected = $expectedState " . PHP_EOL;
     }
 
+    /**
+     * @depends testCreateTable
+     */
     public function testInsertData()
     {
+        $expectedState = TRUE;
+
+        echo PHP_EOL;
         $sql =
           "INSERT INTO `test` (`id`, `name`, `street`, `zip`)
             VALUES
@@ -61,56 +71,163 @@ class DatabaseQueryTest extends TestCase
                 (9,'Blupp','naYhh',94299),
                 (10,'Knister','Lansn',82728)";
 
-        $state = $this->executeQuery($sql);
+        $state = $this->dbInstance->getQuery($sql)
+                                  ->execute();
 
-        $expectedState = DatabaseQuery::STATE_EXECUTED;
         $this->assertEquals($expectedState, $state);
+
+        echo __FUNCTION__ . ": Reported state = $state - expected = $expectedState " . PHP_EOL;
     }
 
+    /**
+     * @depends testInsertData
+     */
     public function testReadFromDB()
     {
+        echo PHP_EOL;
         $sql = "SELECT * FROM `test`";
         $result = FALSE;
+        $totalRows = 0;
+        $okRows = 0;
 
-        $fetchedRows = $this->executeReadQuery($sql)->fetchAllToArray();
+        $fetchedRows =
+          $this->dbInstance->getQuery($sql)
+                           ->fetchAsArray()
+                           ->execute();
 
         foreach ( $fetchedRows as $row ) {
             if ( is_array($row)
                  && array_key_exists('id', $row)
             ) {
                 $result = TRUE;
+                $okRows++;
             }
             else {
                 $result = FALSE;
             }
-            echo "Read";
+
+            $totalRows++;
             $this->assertTrue($result);
         }
 
-        $this->assertTrue($result);
+        echo __FUNCTION__ . ": $okRows of $totalRows is OK " . PHP_EOL;
     }
 
+    /**
+     * @depends testInsertData
+     */
+    public function testReadFromDBWithValues()
+    {
+        echo PHP_EOL;
+        $sql = "SELECT * FROM `test` WHERE `id` = :id";
+        $values = ['id' => 1];
+        $result = FALSE;
+        $totalRows = 0;
+        $okRows = 0;
+
+        $fetchedRows =
+          $this->dbInstance->getQuery($sql)
+                           ->setValuesSingle($values)
+                           ->fetchAsArray()
+                           ->execute();
+
+        foreach ( $fetchedRows as $row ) {
+            if ( is_array($row)
+                 && array_key_exists('id', $row)
+            ) {
+                $result = TRUE;
+                $okRows++;
+            }
+            else {
+                $result = FALSE;
+            }
+            $totalRows++;
+            $this->assertTrue($result);
+        }
+        echo __FUNCTION__ . ": $okRows of $totalRows is OK " . PHP_EOL;
+    }
+
+    /**
+     * @depends testInsertData
+     */
+    public function testReadFromDbWithMultipleValueSets()
+    {
+        echo PHP_EOL;
+        $sql = "SELECT * FROM `test` WHERE `id` = :id";
+
+        $values = [['id' => 2], ['id' => '6']];
+        $totalRows = 0;
+        $okRows = 0;
+
+        $result =
+          $this->dbInstance->getQuery($sql)
+                           ->fetchAsArray()
+                           ->setValuesMulti($values)
+                           ->execute();
+
+        foreach ( $result as $resultSet ) {
+            foreach ( $resultSet as $row ) {
+                $status = FALSE;
+                $totalRows++;
+                if ( array_key_exists('id', $row) ) {
+                    $status = TRUE;
+                    $okRows++;
+                }
+
+                $this->assertTrue($status);
+            }
+        }
+        echo __FUNCTION__ . ": $okRows of $totalRows is OK " . PHP_EOL;
+    }
+
+    /**
+     * @depends testInsertData
+     */
     public function testRemoveRowFromPreparedValues()
     {
+        echo PHP_EOL;
         $sql = "DELETE FROM `test` WHERE `id` = :id";
-
         $values = ['id' => '8'];
+        $exectedStatus = TRUE;
 
-        $this->assertTrue(TRUE);
+        $status =
+          $this->dbInstance->getQuery($sql)
+                           ->inputQuery()
+                           ->setValuesSingle($values)
+                           ->execute();
+
+        $this->assertEquals($status, $exectedStatus);
+        echo __FUNCTION__ . ": reported status = $status - expected: $exectedStatus " . PHP_EOL;
     }
 
-    public function testAddRowsFromPreparedValues()
+    /**
+     * @depends testCreateTable
+     */
+    public function testAddRowsFromSeveralPreparedValues()
     {
+        echo PHP_EOL;
         $sql = "INSERT INTO `test` (`name`, `street`, `zip`)
                 VALUES (:name,:street,:zip)";
+        $totalRows = 0;
+        $okRows = 0;
+        $expectedStatus = TRUE;
 
         $values = [
           ['name' => 'Vera Kruz', 'street' => 'St Lane', 'zip' => '12345'],
           ['name' => 'Michelle Pfeiffer', 'street' => 'Kryz Rd', 'zip' => '12345'],
         ];
+        try {
+            $status = $this->dbInstance->getQuery($sql)
+                                       ->setValuesMulti($values)
+                                       ->inputQuery()
+                                       ->execute();
+            $this->assertEquals($expectedStatus, $status);
+        }
+        catch ( \Vgait\VgaException\VgaExceptionType $exception ) {
+            echo $exception->fullStackToPrintableString();
+        }
 
-
-        $this->assertTrue(TRUE);
+        echo __FUNCTION__ . ": reported status = $status - expected: $expectedStatus " . PHP_EOL;
     }
 
     /**
@@ -118,11 +235,17 @@ class DatabaseQueryTest extends TestCase
      */
     public function testTruncateTable()
     {
-        $sql = "TRUNCATE TABLE `test`";
-        $state = $this->executeQuery($sql);
+        echo PHP_EOL;
 
-        $expectedState = DatabaseQuery::STATE_EXECUTED;
+        $sql = "TRUNCATE TABLE `test`";
+        $state =
+          $this->dbInstance->getQuery($sql)
+                           ->execute();
+
+        $expectedState = TRUE;
         $this->assertEquals($expectedState, $state);
+
+        echo __FUNCTION__ . ": Expect state = $expectedState - actual = $state." . PHP_EOL;
     }
 
     /**
@@ -131,21 +254,13 @@ class DatabaseQueryTest extends TestCase
     public function testRemoveTable()
     {
         $sql = "DROP TABLE `test`";
-        $state = $this->executeQuery($sql);
+        $state =
+          $this->dbInstance->getQuery($sql)
+                           ->execute();
 
-        $expectedState = DatabaseQuery::STATE_EXECUTED;
+        $expectedState = TRUE;
         $this->assertEquals($expectedState, $state);
-    }
-
-    private function executeQuery($sql, $values = []): int
-    {
-        $dbquery = $this->dbInstance->getQuery($sql);
-        return $dbquery->execute($values)->getState();
-    }
-
-    private function executeReadQuery($sql, $values = []): DatabaseQuery
-    {
-        return $this->dbInstance->getQuery($sql)->execute($values);
+        echo __FUNCTION__ . ": Expect state = $expectedState - actual = $state." . PHP_EOL;
     }
 
 }

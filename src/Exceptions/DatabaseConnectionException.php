@@ -50,7 +50,7 @@ class DatabaseConnectionException extends VgaException
     public function toPrintableString(): string
     {
         $parentMessage = parent::toPrintableString();
-        $pdoMessageString = empty($this->originalPdoExeption->getMessage()) ?
+        $pdoMessageString = empty($this->originalPdoExeption) ?
             null : $this->originalPdoExeption->getMessage();
 
         return sprintf(
