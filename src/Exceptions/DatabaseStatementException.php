@@ -3,7 +3,7 @@
  * Created: 2017-06-25 12:24
  */
 
-namespace Vgait\VgaDatabase;
+namespace Vgait\VgaDatabase\Exceptions;
 
 
 use Throwable;
